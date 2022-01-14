@@ -4,13 +4,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class Client {
 
@@ -59,7 +59,19 @@ public class Client {
         out = new JTextField(20);
         JButton sendButton = new JButton("Send");
         sendButton.addActionListener(new SendButtonListener());
-        sendButton.addKeyListener(new SendButtonListener());
+        out.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    writer.println(getTime() + ": " +  out.getText());
+                    writer.flush();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+                out.setText("");
+                out.requestFocus();
+            }
+        });
         mainPanel.add(scrollPane);
         mainPanel.add(out);
         mainPanel.add(sendButton);
@@ -74,36 +86,17 @@ public class Client {
 
 
     }
+    public String getTime() {
+        return new SimpleDateFormat("HH:mm:ss ").format(new Date());
+    }
+
 
     public static void main(String[] args) {
         Client client = new Client();
         client.go();
     }
 
-    public class SendButtonListener implements ActionListener, KeyListener {
-        @Override
-        public void keyTyped(KeyEvent e) {
-
-        }
-        @Override
-        public void  keyPressed(KeyEvent e) {
-            if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                try {
-                    writer.println((out.getText()));
-                    writer.flush();
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-                out.setText("");
-                out.requestFocus();
-                in.append(String.valueOf(writer));
-            }
-        }
-
-        @Override
-        public void keyReleased(KeyEvent e) {
-
-        }
+    public class SendButtonListener implements ActionListener {
 
         public void actionPerformed(ActionEvent e) {
                 try {
